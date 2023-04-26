@@ -46,59 +46,59 @@ const pool = new Pool({
 
 const DEFAULT_EXPIRATION = 3600;
 // OLD route
-// app.get('/api/shoes', (req, res, next) => {
-//     redisClient.get('shoes', (error, shoes) => {
-//         if (error) console.error(error)
-//         if (shoes != null) {
-//             return res.json(JSON.parse(shoes))
-//         } else {
-//             pool.query('SELECT * FROM shoes', (err, result) => {
-//                 if (err){
-//                     res.status(404).send(err)
-//                 } else {
-//                     const data = result.rows;
-//                     redisClient.setEx('shoes', DEFAULT_EXPIRATION, JSON.stringify(data));
-//                     res.status(200).send(data);
-//                 }
-//             })
-//         }
-//     })
-// })
-// New Route
-console.log('Redis client status:', redisClient.status);
 app.get('/api/shoes', (req, res, next) => {
     redisClient.get('shoes', (error, shoes) => {
-        if (error) {
-            console.error(error);
-            return res.status(500).send('Error retrieving shoes from cache');
-        }
-        
+        if (error) console.error(error)
         if (shoes != null) {
-            try {
-                const parsedShoes = JSON.parse(shoes);
-                return res.json(parsedShoes);
-            } catch (parseError) {
-                console.error(parseError);
-                return res.status(500).send('Error parsing shoes JSON data');
-            }
+            return res.json(JSON.parse(shoes))
         } else {
             pool.query('SELECT * FROM shoes', (err, result) => {
-                if (err) {
-                    res.status(500).send(err);
+                if (err){
+                    res.status(404).send(err)
                 } else {
                     const data = result.rows;
-                    redisClient.setex('shoes', DEFAULT_EXPIRATION, JSON.stringify(data), (setexErr) => {
-                        if (setexErr) {
-                            console.error(setexErr);
-                            return res.status(500).send('Error saving shoes to cache');
-                        }
-                        res.status(200).send(data);
-                    });
+                    redisClient.setEx('shoes', DEFAULT_EXPIRATION, JSON.stringify(data));
+                    res.status(200).send(data);
                 }
-            });
+            })
         }
-    });
-});
+    })
+})
+// New Route
+// console.log('Redis client status:', redisClient.status);
+// app.get('/api/shoes', (req, res, next) => {
+//     redisClient.get('shoes', (error, shoes) => {
+//         if (error) {
+//             console.error(error);
+//             return res.status(500).send('Error retrieving shoes from cache');
+//         }
+        
+//         if (shoes != null) {
+//             try {
+//                 const parsedShoes = JSON.parse(shoes);
+//                 return res.json(parsedShoes);
+//             } catch (parseError) {
+//                 console.error(parseError);
+//                 return res.status(500).send('Error parsing shoes JSON data');
+//             }
+//         } else {
+//             pool.query('SELECT * FROM shoes', (err, result) => {
+//                 if (err) {
+//                     res.status(500).send(err);
+//                 } else {
+//                     const data = result.rows;
+//                     redisClient.setex('shoes', DEFAULT_EXPIRATION, JSON.stringify(data), (setexErr) => {
+//                         if (setexErr) {
+//                             console.error(setexErr);
+//                             return res.status(500).send('Error saving shoes to cache');
+//                         }
+//                         res.status(200).send(data);
+//                     });
+//                 }
+//             });
+//         }
+//     });
+// });
 
 
 app.get('/api/shoes/:id', (req, res, next) =>{
